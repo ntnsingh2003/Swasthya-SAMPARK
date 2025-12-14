@@ -14,8 +14,17 @@ sys.path.insert(0, os.path.dirname(__file__))
 if not os.environ.get('FLASK_ENV'):
     os.environ['FLASK_ENV'] = 'production'
 
-# Import the Flask app
-from backend.app import app
+# Import the Flask app and init_db
+from backend.app import app, init_db
+
+# Initialize database on startup (creates tables if they don't exist)
+# This ensures database is ready when deployed to production
+try:
+    init_db()
+    print("[OK] Database initialized successfully")
+except Exception as e:
+    print(f"[WARNING] Database initialization warning: {e}")
+    # Continue anyway - tables might already exist
 
 # For WSGI servers
 application = app
