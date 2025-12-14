@@ -11,6 +11,7 @@ import numpy as np
 import requests
 import random
 import warnings
+import re
 
 # Firebase Admin SDK
 try:
@@ -272,283 +273,290 @@ def init_db():
         )
         print("[OK] Created/verified hospitals table")
 
-    # Doctors
-    cur.execute(
-        '''CREATE TABLE IF NOT EXISTS doctors (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               hospital_id INTEGER NOT NULL,
-               name TEXT NOT NULL,
-               email TEXT UNIQUE NOT NULL,
-               password TEXT NOT NULL,
-               specialization TEXT,
-               FOREIGN KEY(hospital_id) REFERENCES hospitals(id)
-           )'''
-    )
+        # Doctors
+        cur.execute(
+            '''CREATE TABLE IF NOT EXISTS doctors (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   hospital_id INTEGER NOT NULL,
+                   name TEXT NOT NULL,
+                   email TEXT UNIQUE NOT NULL,
+                   password TEXT NOT NULL,
+                   specialization TEXT,
+                   FOREIGN KEY(hospital_id) REFERENCES hospitals(id)
+               )'''
+        )
+        print("[OK] Created/verified doctors table")
 
-    # Users / Patients
-    cur.execute(
-        '''CREATE TABLE IF NOT EXISTS users (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               name TEXT NOT NULL,
-               email TEXT UNIQUE NOT NULL,
-               password TEXT NOT NULL,
-               phone TEXT,
-               address TEXT,
-               health_id TEXT UNIQUE NOT NULL,
-               age INTEGER,
-               gender TEXT
-           )'''
-    )
+        # Users / Patients
+        cur.execute(
+            '''CREATE TABLE IF NOT EXISTS users (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   name TEXT NOT NULL,
+                   email TEXT UNIQUE NOT NULL,
+                   password TEXT NOT NULL,
+                   phone TEXT,
+                   address TEXT,
+                   health_id TEXT UNIQUE NOT NULL,
+                   age INTEGER,
+                   gender TEXT
+               )'''
+        )
+        print("[OK] Created/verified users table")
 
-    # Medical records (per consultation)
-    cur.execute(
-        '''CREATE TABLE IF NOT EXISTS records (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               user_id INTEGER NOT NULL,
-               doctor_id INTEGER NOT NULL,
-               date TEXT NOT NULL,
-               symptoms TEXT,
-               diagnosis TEXT,
-               medicines TEXT,
-               dosage TEXT,
-               treatment_status TEXT,
-               consultation_duration INTEGER,
-               prescription_text TEXT,
-               prescription_filename TEXT,
-               blood_report_filename TEXT,
-               report_filename TEXT,
-               created_at TEXT NOT NULL,
-               risk_level TEXT,
-               risk_score REAL,
-               FOREIGN KEY(user_id) REFERENCES users(id),
-               FOREIGN KEY(doctor_id) REFERENCES doctors(id)
-           )'''
-    )
+        # Medical records (per consultation)
+        cur.execute(
+            '''CREATE TABLE IF NOT EXISTS records (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   user_id INTEGER NOT NULL,
+                   doctor_id INTEGER NOT NULL,
+                   date TEXT NOT NULL,
+                   symptoms TEXT,
+                   diagnosis TEXT,
+                   medicines TEXT,
+                   dosage TEXT,
+                   treatment_status TEXT,
+                   consultation_duration INTEGER,
+                   prescription_text TEXT,
+                   prescription_filename TEXT,
+                   blood_report_filename TEXT,
+                   report_filename TEXT,
+                   created_at TEXT NOT NULL,
+                   risk_level TEXT,
+                   risk_score REAL,
+                   FOREIGN KEY(user_id) REFERENCES users(id),
+                   FOREIGN KEY(doctor_id) REFERENCES doctors(id)
+               )'''
+        )
+        print("[OK] Created/verified records table")
 
-    # Emergency requests
-    cur.execute(
-        '''CREATE TABLE IF NOT EXISTS emergencies (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               user_id INTEGER,
-               name TEXT,
-               phone TEXT,
-               location TEXT NOT NULL,
-               status TEXT NOT NULL,
-               requested_at TEXT NOT NULL,
-               response_time_minutes INTEGER
-           )'''
-    )
+        # Emergency requests
+        cur.execute(
+            '''CREATE TABLE IF NOT EXISTS emergencies (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   user_id INTEGER,
+                   name TEXT,
+                   phone TEXT,
+                   location TEXT NOT NULL,
+                   status TEXT NOT NULL,
+                   requested_at TEXT NOT NULL,
+                   response_time_minutes INTEGER
+               )'''
+        )
+        print("[OK] Created/verified emergencies table")
 
-    # OTP storage for password reset and login
-    cur.execute(
-        '''CREATE TABLE IF NOT EXISTS otp_codes (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               phone TEXT NOT NULL,
-               code TEXT NOT NULL,
-               role TEXT NOT NULL,
-               identifier TEXT NOT NULL,
-               purpose TEXT NOT NULL,
-               created_at TEXT NOT NULL,
-               expires_at TEXT NOT NULL,
-               verified INTEGER DEFAULT 0
-           )'''
-    )
+        # OTP storage for password reset and login
+        cur.execute(
+            '''CREATE TABLE IF NOT EXISTS otp_codes (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   phone TEXT NOT NULL,
+                   code TEXT NOT NULL,
+                   role TEXT NOT NULL,
+                   identifier TEXT NOT NULL,
+                   purpose TEXT NOT NULL,
+                   created_at TEXT NOT NULL,
+                   expires_at TEXT NOT NULL,
+                   verified INTEGER DEFAULT 0
+               )'''
+        )
+        print("[OK] Created/verified otp_codes table")
 
-    conn.commit()
-    
-    # Add missing columns if they don't exist
-    # Hospitals table
-    try:
-        cur.execute('ALTER TABLE hospitals ADD COLUMN state TEXT')
         conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Emergencies table - ML prediction columns
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN priority TEXT')
+        
         conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN severity TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN prediction_score REAL')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN symptoms TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN age INTEGER')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Emergency additional fields for ML model
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN state TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN zone TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN day TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN time_slot TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN emergency_type TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE emergencies ADD COLUMN weather TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE hospitals ADD COLUMN district TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Users table
-    try:
-        cur.execute('ALTER TABLE users ADD COLUMN age INTEGER')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE users ADD COLUMN gender TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Doctors table - add phone
-    try:
-        cur.execute('ALTER TABLE doctors ADD COLUMN phone TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Hospitals table - add phone
-    try:
-        cur.execute('ALTER TABLE hospitals ADD COLUMN phone TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Records table
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN dosage TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN treatment_status TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN consultation_duration INTEGER')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN prescription_text TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN prescription_filename TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN blood_report_filename TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN blood_report_file TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN prescription_file TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Add risk prediction columns
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN risk_level TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        cur.execute('ALTER TABLE records ADD COLUMN risk_score REAL')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    # Add health metrics columns for risk prediction
-    health_metrics_columns = [
-        ('systolic_bp', 'INTEGER'),
-        ('diastolic_bp', 'INTEGER'),
-        ('bmi', 'REAL'),
-        ('cholesterol', 'REAL'),
-        ('glucose', 'REAL'),
-        ('smoking', 'TEXT'),
-        ('alcohol', 'TEXT'),
-        ('physical_activity', 'TEXT'),
-        ('family_history', 'TEXT'),
-    ]
-    
-    for col_name, col_type in health_metrics_columns:
+        
+        # Add missing columns if they don't exist
+        # Hospitals table
         try:
-            cur.execute(f'ALTER TABLE records ADD COLUMN {col_name} {col_type}')
+            cur.execute('ALTER TABLE hospitals ADD COLUMN state TEXT')
             conn.commit()
         except sqlite3.OperationalError:
             pass  # Column already exists
-    
-    conn.close()
-    print("[OK] Database initialization completed successfully")
+        
+        # Emergencies table - ML prediction columns
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN priority TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN severity TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN prediction_score REAL')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN symptoms TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN age INTEGER')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Emergency additional fields for ML model
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN state TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN zone TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN day TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN time_slot TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN emergency_type TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE emergencies ADD COLUMN weather TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE hospitals ADD COLUMN district TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Users table
+        try:
+            cur.execute('ALTER TABLE users ADD COLUMN age INTEGER')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE users ADD COLUMN gender TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Doctors table - add phone
+        try:
+            cur.execute('ALTER TABLE doctors ADD COLUMN phone TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Hospitals table - add phone
+        try:
+            cur.execute('ALTER TABLE hospitals ADD COLUMN phone TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Records table
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN dosage TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN treatment_status TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN consultation_duration INTEGER')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN prescription_text TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN prescription_filename TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN blood_report_filename TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN blood_report_file TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN prescription_file TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Add risk prediction columns
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN risk_level TEXT')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cur.execute('ALTER TABLE records ADD COLUMN risk_score REAL')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Add health metrics columns for risk prediction
+        health_metrics_columns = [
+            ('systolic_bp', 'INTEGER'),
+            ('diastolic_bp', 'INTEGER'),
+            ('bmi', 'REAL'),
+            ('cholesterol', 'REAL'),
+            ('glucose', 'REAL'),
+            ('smoking', 'TEXT'),
+            ('alcohol', 'TEXT'),
+            ('physical_activity', 'TEXT'),
+            ('family_history', 'TEXT'),
+        ]
+        
+        for col_name, col_type in health_metrics_columns:
+            try:
+                cur.execute(f'ALTER TABLE records ADD COLUMN {col_name} {col_type}')
+                conn.commit()
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+        
+        conn.close()
+        print("[OK] Database initialization completed successfully")
     except Exception as e:
         print(f"[ERROR] Database initialization failed: {e}")
         import traceback
@@ -1868,7 +1876,6 @@ def doctor_login():
                 if success:
                     flash(message, 'success')  # Show OTP in message
                     # Extract OTP code from message for display
-                    import re
                     otp_match = re.search(r'(\d{6})', message)
                     otp_code_display = otp_match.group(1) if otp_match else None
                     return render_template('doctor_login.html', login_type='otp', email=email, phone=phone, otp_sent=True, otp_code=otp_code_display, otp_message=message)
@@ -1964,9 +1971,9 @@ def doctor_forgot_password():
             
             conn.close()
             
-                success, message = send_otp(normalized_phone, 'doctor', email, 'reset')
-                if success:
-                    flash(message, 'success')  # Show OTP in message
+            success, message = send_otp(normalized_phone, 'doctor', email, 'reset')
+            if success:
+                flash(message, 'success')  # Show OTP in message
                 return render_template('forgot_password.html', role='doctor', step='verify', email=email, phone=phone)
             else:
                 flash(message, 'danger')
@@ -2502,7 +2509,6 @@ def user_login():
                 if success:
                     flash(message, 'success')  # Show OTP in message
                     # Extract OTP code from message for display
-                    import re
                     otp_match = re.search(r'(\d{6})', message)
                     otp_code_display = otp_match.group(1) if otp_match else None
                     return render_template('user_login.html', login_type='otp', identifier=identifier, phone=phone, otp_sent=True, otp_code=otp_code_display, otp_message=message)
