@@ -1,0 +1,50 @@
+# Firebase credentials (NEVER commit these!)
+firebase_service_account.json
+backend/pkl/*firebase*.json
+backend/pkl/swasthya-sampark-firebase-adminsdk-*.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+backend/health_system.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# QR Codes
+frontend/static/qr/*
+!frontend/static/qr/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!env.example
+

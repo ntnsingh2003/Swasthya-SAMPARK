@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Hospital Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>🏥 Hospital Dashboard</h1>
+        {% if hospital %}
+        <p class="help-text">📍 {{ hospital['state'] or '-' }}, {{ hospital['district'] or '-' }}</p>
+        {% endif %}
+    </div>
+    <div class="page-header-actions">
+        <a href="{{ url_for('hospital_profile') }}" class="btn small">👤 Profile</a>
+        <a href="{{ url_for('hospital_logout') }}" class="btn small">Logout</a>
+    </div>
+</div>
+
+<section class="grid stats-grid">
+    <div class="card stat-card">
+        <div class="stat-label">👨‍⚕️ Doctors</div>
+        <div class="stat-value">{{ doctors_count }}</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-label">👥 Patients Treated</div>
+        <div class="stat-value">{{ patients_count }}</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-label">🚑 Emergency Cases</div>
+        <div class="stat-value">{{ emergency_count }}</div>
+        <p class="help-text stat-subtext" id="emergency-avg-text">Avg response: loadingf</p>
+    </div>
+</section>
+
+<section class="two-column mt-lg">
+    <div class="card form-card">
+        <h2>➕ Add Doctor Account</h2>
+        <form method="post" action="{{ url_for('add_doctor') }}">
+            <div class="form-group">
+                <label for="name">Doctor Name</label>
+                <input type="text" id="name" name="name" placeholder="Full name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="doctor@hospital.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Temporary Password</label>
+                <input type="text" id="password" name="password" placeholder="Auto-generated password" required>
+            </div>
+            <div class="form-group">
+                <label for="specialization">Specialization</label>
+                <input type="text" id="specialization" name="specialization" placeholder="e.g., Cardiology, Pediatrics">
+            </div>
+            <button type="submit" class="btn primary full-width">Create Doctor Account</button>
+        </form>
+    </div>
+    <div class="card">
+        <div class="section-header">
+            <h2>👨‍⚕️ Doctor List</h2>
+            <div class="form-group inline" style="margin-bottom: 0; max-width: 260px; margin-left: auto;">
+                <input type="text" id="doctor-search" placeholder="Search by name, email, specialization">
+            </div>
+        </div>
+        {% if doctors %}
+        <table class="table" id="hospital-doctor-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Specialization</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for d in doctors %}
+                <tr data-doctor-search="{{ (d['name'] ~ ' ' ~ d['email'] ~ ' ' ~ (d['specialization'] or ''))|lower }}">
+                    <td>{{ d['name'] }}</td>
+                    <td>{{ d['email'] }}</td>
+                    <td>{{ d['specialization'] or '-' }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('delete_doctor', doctor_id=d['id']) }}" class="doctor-delete-form">
+                            <button type="submit" class="btn small" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No doctors created yet. Use the form to add one.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

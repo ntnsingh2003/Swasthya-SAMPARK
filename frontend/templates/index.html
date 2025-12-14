@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<!-- Modern Hero Section -->
+<section class="modern-hero">
+    <div class="hero-background">
+        <div class="hero-gradient"></div>
+        <div class="hero-pattern"></div>
+    </div>
+    <div class="container hero-container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">🏥</span>
+                <span>Government Healthcare Platform</span>
+            </div>
+            <h1 class="hero-title">
+                Connected Health Records.<br>
+                <span class="gradient-text">Faster Emergency Response.</span>
+            </h1>
+            <p class="hero-description">
+                Access your ABHA-linked health records instantly. AI-powered emergency response system ensures faster ambulance dispatch when every second counts.
+            </p>
+            <div class="hero-cta">
+                <a href="{{ url_for('user_register') }}" class="btn btn-hero-primary">
+                    <span>Access Health ID</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="{{ url_for('hospital_login') }}" class="btn btn-hero-secondary">
+                    Hospital Login
+                </a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="hero-card-float">
+                <div class="floating-card card-1">
+                    <div class="card-icon">🆔</div>
+                    <div class="card-text">
+                        <div class="card-label">Health ID</div>
+                        <div class="card-value">H-ABHA-1234</div>
+                    </div>
+                </div>
+                <div class="floating-card card-2">
+                    <div class="card-icon">📊</div>
+                    <div class="card-text">
+                        <div class="card-label">Records</div>
+                        <div class="card-value">Secure & Encrypted</div>
+                    </div>
+                </div>
+                <div class="floating-card card-3">
+                    <div class="card-icon">🚑</div>
+                    <div class="card-text">
+                        <div class="card-label">Emergency</div>
+                        <div class="card-value">24/7 Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feature Highlights -->
+<section class="features-section">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-wrapper icon-blue">
+                    <div class="feature-icon">🆔</div>
+                </div>
+                <h3>Digital Health ID</h3>
+                <p>ABHA-linked unique health identity. Access your records anywhere, anytime with a simple QR code scan.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper icon-green">
+                    <div class="feature-icon">🔒</div>
+                </div>
+                <h3>Secure Medical Records</h3>
+                <p>End-to-end encrypted medical history. Your data, your control. Share with doctors instantly when needed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper icon-red">
+                    <div class="feature-icon">🚨</div>
+                </div>
+                <h3>Emergency SOS</h3>
+                <p>One-tap emergency response. AI-optimized ambulance dispatch ensures fastest possible medical assistance.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-wrapper icon-teal">
+                    <div class="feature-icon">📍</div>
+                </div>
+                <h3>Smart Ambulance</h3>
+                <p>Location-based routing and real-time tracking. Get help faster with intelligent dispatch system.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Roles Section -->
+<section class="roles-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Who Can Use Swasthya SAMPARK?</h2>
+            <p>Designed for everyone in the healthcare ecosystem</p>
+        </div>
+        <div class="roles-grid">
+            <div class="role-card role-hospital">
+                <div class="role-header">
+                    <div class="role-icon">🏥</div>
+                    <h3>Hospital Admin</h3>
+                </div>
+                <p>Manage your hospital's digital infrastructure with powerful admin tools.</p>
+                <ul class="role-features">
+                    <li>Create and manage doctor accounts</li>
+                    <li>View comprehensive analytics</li>
+                    <li>Monitor emergency response metrics</li>
+                    <li>Track patient statistics</li>
+                </ul>
+                <a href="{{ url_for('hospital_login') }}" class="role-cta">Hospital Login →</a>
+            </div>
+            <div class="role-card role-doctor">
+                <div class="role-header">
+                    <div class="role-icon">👨‍⚕️</div>
+                    <h3>Doctor</h3>
+                </div>
+                <p>Access patient records instantly and update medical history efficiently.</p>
+                <ul class="role-features">
+                    <li>Search patients by Health ID</li>
+                    <li>View complete medical history</li>
+                    <li>Add prescriptions and reports</li>
+                    <li>Track treatment progress</li>
+                </ul>
+                <a href="{{ url_for('doctor_login') }}" class="role-cta">Doctor Login →</a>
+            </div>
+            <div class="role-card role-patient">
+                <div class="role-header">
+                    <div class="role-icon">👤</div>
+                    <h3>Patient</h3>
+                </div>
+                <p>Take control of your health with easy access to all your medical records.</p>
+                <ul class="role-features">
+                    <li>Access personal health records</li>
+                    <li>Download and share records</li>
+                    <li>Emergency SOS button</li>
+                    <li>QR code for quick access</li>
+                </ul>
+                <a href="{{ url_for('user_login') }}" class="role-cta">Patient Login →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Access Section -->
+<section class="quick-access-section">
+    <div class="container">
+        <div class="quick-access-card">
+            <div class="quick-access-content">
+                <h2>Ready to Get Started?</h2>
+                <p>Join thousands of users who trust Swasthya SAMPARK for their healthcare needs</p>
+            </div>
+            <div class="quick-access-buttons">
+                <a href="{{ url_for('user_register') }}" class="btn btn-primary-large">Create Health ID</a>
+                <a href="{{ url_for('user_login') }}" class="btn btn-outline-large">Patient Login</a>
+                <a href="{{ url_for('doctor_login') }}" class="btn btn-outline-large">Doctor Login</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

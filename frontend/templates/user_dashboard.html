@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>👋 Welcome, {{ user['name'] }}</h1>
+        <p class="help-text">Manage your health records and medical history</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{{ url_for('user_profile') }}" class="btn small">👤 Profile</a>
+        <a href="{{ url_for('emergency') }}" class="btn danger small">🚑 Emergency</a>
+        <a href="{{ url_for('user_logout') }}" class="btn small">Logout</a>
+    </div>
+</div>
+
+<section class="grid">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2>👤 Your Profile</h2>
+            <a href="{{ url_for('user_profile') }}" class="btn small">Edit Profile</a>
+        </div>
+        <div style="display: grid; gap: 0.75rem;">
+            <div>
+                <span style="color: var(--text-light); font-size: 0.85rem;">Name</span>
+                <p style="font-weight: 600;">{{ user['name'] }}</p>
+            </div>
+            <div>
+                <span style="color: var(--text-light); font-size: 0.85rem;">Email</span>
+                <p style="font-weight: 600;">{{ user['email'] }}</p>
+            </div>
+            <div>
+                <span style="color: var(--text-light); font-size: 0.85rem;">Phone</span>
+                <p style="font-weight: 600;">{{ user['phone'] or '-' }}</p>
+            </div>
+            <div>
+                <span style="color: var(--text-light); font-size: 0.85rem;">Address</span>
+                <p style="font-weight: 600;">{{ user['address'] or '-' }}</p>
+            </div>
+            {% if user['age'] %}
+            <div>
+                <span style="color: var(--text-light); font-size: 0.85rem;">Age</span>
+                <p style="font-weight: 600;">{{ user['age'] }} years</p>
+            </div>
+            {% endif %}
+            {% if user['gender'] %}
+            <div>
+                <span style="color: var(--text-light); font-size: 0.85rem;">Gender</span>
+                <p style="font-weight: 600;">{{ user['gender'] }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card health-id-card">
+        <h2>🆔 Health ID</h2>
+        <p class="health-id-value">{{ user['health_id'] }}</p>
+        <div class="qr-wrapper">
+            <img src="{{ url_for('static', filename=qr_path) }}" alt="Health ID QR">
+        </div>
+        <p class="help-text">Show this QR or ID at any hospital/doctor using this system.</p>
+    </div>
+</section>
+
+<section class="card mt-lg">
+    <div class="section-header">
+        <h2>Hospitals You've Visited</h2>
+        <span class="badge">{{ hospitals|length if hospitals is defined else 0 }} hospitals</span>
+    </div>
+
+    {% if hospitals %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Hospital Name</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for h in hospitals %}
+        <tr>
+            <td><strong>{{ h['name'] }}</strong></td>
+            <td>
+                <a href="{{ url_for('user_hospital_detail', hospital_id=h['hospital_id']) }}" class="btn primary small">👁️ View Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="help-text">You have not been treated at any hospital in this system yet.</p>
+    {% endif %}
+</section>
+
+{% endblock %}
