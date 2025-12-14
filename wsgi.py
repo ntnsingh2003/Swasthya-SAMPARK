@@ -19,12 +19,16 @@ from backend.app import app, init_db
 
 # Initialize database on startup (creates tables if they don't exist)
 # This ensures database is ready when deployed to production
+print("[INFO] Starting database initialization...")
 try:
     init_db()
-    print("[OK] Database initialized successfully")
+    print("[OK] Database initialization completed - all tables ready")
 except Exception as e:
-    print(f"[WARNING] Database initialization warning: {e}")
-    # Continue anyway - tables might already exist
+    print(f"[ERROR] Database initialization failed: {e}")
+    import traceback
+    traceback.print_exc()
+    # Don't continue if database init fails - this is critical
+    raise
 
 # For WSGI servers
 application = app

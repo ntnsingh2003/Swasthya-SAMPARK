@@ -244,21 +244,33 @@ def get_db_connection():
 
 # Initialize database with basic schema
 def init_db():
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    # Hospitals
-    cur.execute(
-        '''CREATE TABLE IF NOT EXISTS hospitals (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               name TEXT NOT NULL,
-               reg_no TEXT UNIQUE NOT NULL,
-               email TEXT UNIQUE NOT NULL,
-               password TEXT NOT NULL,
-               state TEXT,
-               district TEXT
-           )'''
-    )
+    """Initialize database and create all tables if they don't exist"""
+    # Ensure database directory exists
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"[INFO] Created database directory: {db_dir}")
+    
+    print(f"[INFO] Initializing database at: {DB_PATH}")
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        print("[INFO] Creating database tables...")
+        
+        # Hospitals
+        cur.execute(
+            '''CREATE TABLE IF NOT EXISTS hospitals (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   name TEXT NOT NULL,
+                   reg_no TEXT UNIQUE NOT NULL,
+                   email TEXT UNIQUE NOT NULL,
+                   password TEXT NOT NULL,
+                   state TEXT,
+                   district TEXT
+               )'''
+        )
+        print("[OK] Created/verified hospitals table")
 
     # Doctors
     cur.execute(
@@ -536,6 +548,18 @@ def init_db():
             pass  # Column already exists
     
     conn.close()
+    print("[OK] Database initialization completed successfully")
+    except Exception as e:
+        print(f"[ERROR] Database initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+        # Try to close connection if it was opened
+        try:
+            if 'conn' in locals():
+                conn.close()
+        except:
+            pass
+        raise  # Re-raise to ensure we know about the error
 
 
 # Utility: generate unique health ID
