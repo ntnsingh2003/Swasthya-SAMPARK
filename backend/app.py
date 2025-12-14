@@ -954,14 +954,18 @@ def send_otp(phone, role, identifier, purpose='login'):
         # For now, we'll use a simple approach - in production, use Firebase Auth phone verification
         # or integrate with Firebase Cloud Functions to send SMS
         
-        # For development: print OTP (remove in production)
+        # Log OTP for debugging (visible in Render logs)
         print(f"[OTP DEBUG] OTP for {phone} ({role}): {otp_code}")
         print(f"[OTP INFO] OTP stored in database. Expires at: {expires_at}")
+        
+        # Show OTP in response message (until SMS service is integrated)
+        # TODO: Once SMS is integrated, remove OTP from message and only show "OTP sent to your phone"
+        message = f"OTP sent successfully. Your OTP code is: {otp_code} (expires in {OTP_EXPIRY_MINUTES} minutes). Check Render logs if not visible."
         
         # TODO: Integrate with Firebase Cloud Functions or SMS service to actually send SMS
         # For now, OTP is generated and stored - integrate SMS sending service here
         
-        return True, "OTP sent successfully"
+        return True, message
         
     except Exception as e:
         print(f"[OTP ERROR] {str(e)}")
@@ -1420,7 +1424,7 @@ def hospital_login():
                 # Use normalized phone for OTP
                 success, message = send_otp(normalized_phone, 'hospital', email, 'login')
                 if success:
-                    flash('OTP sent to your phone', 'success')
+                    flash(message, 'success')  # Show OTP in message
                     return render_template('hospital_login.html', login_type='otp', email=email, phone=phone, otp_sent=True)
                 else:
                     flash(message, 'danger')
@@ -1568,7 +1572,7 @@ def hospital_forgot_password():
             
             success, message = send_otp(normalized_phone, 'hospital', email, 'reset')
             if success:
-                flash('OTP sent to your phone', 'success')
+                flash(message, 'success')  # Show OTP in message
                 return render_template('forgot_password.html', role='hospital', step='verify', email=email, phone=phone)
             else:
                 flash(message, 'danger')
@@ -1858,7 +1862,7 @@ def doctor_login():
                 # Use normalized phone for OTP
                 success, message = send_otp(normalized_phone, 'doctor', email, 'login')
                 if success:
-                    flash('OTP sent to your phone', 'success')
+                    flash(message, 'success')  # Show OTP in message
                     return render_template('doctor_login.html', login_type='otp', email=email, phone=phone, otp_sent=True)
                 else:
                     flash(message, 'danger')
@@ -1952,9 +1956,9 @@ def doctor_forgot_password():
             
             conn.close()
             
-            success, message = send_otp(normalized_phone, 'doctor', email, 'reset')
-            if success:
-                flash('OTP sent to your phone', 'success')
+                success, message = send_otp(normalized_phone, 'doctor', email, 'reset')
+                if success:
+                    flash(message, 'success')  # Show OTP in message
                 return render_template('forgot_password.html', role='doctor', step='verify', email=email, phone=phone)
             else:
                 flash(message, 'danger')
@@ -2488,7 +2492,7 @@ def user_login():
                 # Use normalized phone for OTP
                 success, message = send_otp(normalized_phone, 'user', identifier, 'login')
                 if success:
-                    flash('OTP sent to your phone', 'success')
+                    flash(message, 'success')  # Show OTP in message
                     return render_template('user_login.html', login_type='otp', identifier=identifier, phone=phone, otp_sent=True)
                 else:
                     flash(message, 'danger')
@@ -2584,7 +2588,7 @@ def user_forgot_password():
             
             success, message = send_otp(normalized_phone, 'user', identifier, 'reset')
             if success:
-                flash('OTP sent to your phone', 'success')
+                flash(message, 'success')  # Show OTP in message
                 return render_template('forgot_password.html', role='user', step='verify', identifier=identifier, phone=phone)
             else:
                 flash(message, 'danger')
