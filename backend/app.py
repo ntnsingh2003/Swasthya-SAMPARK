@@ -1425,7 +1425,11 @@ def hospital_login():
                 success, message = send_otp(normalized_phone, 'hospital', email, 'login')
                 if success:
                     flash(message, 'success')  # Show OTP in message
-                    return render_template('hospital_login.html', login_type='otp', email=email, phone=phone, otp_sent=True)
+                    # Extract OTP code from message for display
+                    import re
+                    otp_match = re.search(r'(\d{6})', message)
+                    otp_code_display = otp_match.group(1) if otp_match else None
+                    return render_template('hospital_login.html', login_type='otp', email=email, phone=phone, otp_sent=True, otp_code=otp_code_display, otp_message=message)
                 else:
                     flash(message, 'danger')
                 return render_template('hospital_login.html', login_type='otp', email=email, phone=phone)
@@ -1863,7 +1867,11 @@ def doctor_login():
                 success, message = send_otp(normalized_phone, 'doctor', email, 'login')
                 if success:
                     flash(message, 'success')  # Show OTP in message
-                    return render_template('doctor_login.html', login_type='otp', email=email, phone=phone, otp_sent=True)
+                    # Extract OTP code from message for display
+                    import re
+                    otp_match = re.search(r'(\d{6})', message)
+                    otp_code_display = otp_match.group(1) if otp_match else None
+                    return render_template('doctor_login.html', login_type='otp', email=email, phone=phone, otp_sent=True, otp_code=otp_code_display, otp_message=message)
                 else:
                     flash(message, 'danger')
                 return render_template('doctor_login.html', login_type='otp', email=email, phone=phone)
@@ -2493,7 +2501,11 @@ def user_login():
                 success, message = send_otp(normalized_phone, 'user', identifier, 'login')
                 if success:
                     flash(message, 'success')  # Show OTP in message
-                    return render_template('user_login.html', login_type='otp', identifier=identifier, phone=phone, otp_sent=True)
+                    # Extract OTP code from message for display
+                    import re
+                    otp_match = re.search(r'(\d{6})', message)
+                    otp_code_display = otp_match.group(1) if otp_match else None
+                    return render_template('user_login.html', login_type='otp', identifier=identifier, phone=phone, otp_sent=True, otp_code=otp_code_display, otp_message=message)
                 else:
                     flash(message, 'danger')
                 return render_template('user_login.html', login_type='otp', identifier=identifier, phone=phone)
