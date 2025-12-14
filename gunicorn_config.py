@@ -9,7 +9,10 @@ bind = f"{os.environ.get('HOST', '0.0.0.0')}:{os.environ.get('PORT', '5000')}"
 backlog = 2048
 
 # Worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+# Optimized for Render free tier (512MB RAM)
+# For paid plans, you can increase workers
+cpu_count = multiprocessing.cpu_count()
+workers = max(2, min(cpu_count * 2 + 1, 4))  # Cap at 4 for free tier
 worker_class = 'gevent'
 worker_connections = 1000
 timeout = 30

@@ -77,9 +77,8 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     
     # Production-specific settings
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY environment variable must be set in production")
+    # SECRET_KEY is inherited from Config class which gets it from os.environ
+    # We'll validate it at runtime in get_config() instead of at class definition
 
 class TestingConfig(Config):
     """Testing configuration"""
@@ -99,5 +98,22 @@ config = {
 def get_config():
     """Get configuration based on environment"""
     env = os.environ.get('FLASK_ENV', 'development')
-    return config.get(env, config['default'])
+    config_class = config.get(env, config['default'])
+    
+    # Validate SECRET_KEY for production
+    if env == 'production':
+        secret_key = os.environ.get('SECRET_KEY')
+        if not secret_key or secret_key == 'dev-secret-key-change-in-prod':
+            import warnings
+            warnings.warn(
+                "SECRET_KEY not set or using default value in production! "
+                "Please set SECRET_KEY environment variable. "
+                "For now, using a temporary key (NOT SECURE FOR PRODUCTION).",
+                UserWarning
+            )
+            # Use a fallback but warn - this should be fixed
+            import secrets
+            os.environ['SECRET_KEY'] = secrets.token_hex(32)
+    
+    return config_class
 

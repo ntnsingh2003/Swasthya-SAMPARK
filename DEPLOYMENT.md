@@ -269,6 +269,33 @@ heroku run python -c "from backend.app import init_db; init_db()"
 2. **Set Environment Variables** in Railway dashboard
 3. **Deploy** - Railway auto-detects and deploys
 
+### Render.com
+
+**Quick Deploy:**
+
+1. **Connect Repository**
+   - Go to https://dashboard.render.com
+   - Click "New +" → "Web Service"
+   - Connect your Git repository
+
+2. **Configure Service**
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn --config gunicorn_config.py wsgi:application`
+   - **Environment**: Python 3
+
+3. **Set Environment Variables** (see `render.env` or `RENDER_ENV_QUICKREF.md`)
+   - `FLASK_APP=backend/app.py`
+   - `FLASK_ENV=production`
+   - `FLASK_DEBUG=0`
+   - `SECRET_KEY=[Generate with: python -c "import secrets; print(secrets.token_hex(32))"]`
+   - `FIREBASE_WEB_API_KEY=[Your Firebase API Key]`
+
+4. **Deploy**
+   - Click "Create Web Service"
+   - Service will build and deploy automatically
+
+**For detailed Render deployment guide, see `RENDER_DEPLOYMENT.md`**
+
 ### AWS Elastic Beanstalk
 
 1. **Install EB CLI**:
